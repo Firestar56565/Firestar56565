@@ -2,8 +2,9 @@ var shipImage;
 var ship;
 var asteroids;
 var bullets;
-var bulletImage;
 var shipImage, bulletImage, particleImage;
+var mines;
+var minesImage;
 
 function setup() {
     createCanvas(windowWidth, windowHeight);
@@ -18,6 +19,7 @@ function setup() {
     
     bullets = new Group();
     asteroids = new Group();
+    mines = new Group();
     
     for (var i = 0; i<8; i++) {
     var ang = random(360);
@@ -28,19 +30,21 @@ function setup() {
     
     shipImage = loadImage("images/asteroids_ship0001.png");
     
-    bulletImage = loadImage("images/pepe.jpeg");
+    bulletImage = loadImage("images/blueblast.png");
     
     particleImage = loadImage("images/asteroids_particle.png");
+    
+    minesImage = loadImage("images/asteroids_bullet.png");
 }
 
 function draw() {
     
-    background(254,248,248);
+    background(120, 120, 120);
     fill(254,190,190);
     textAlign(RIGHT);
     textSize(12);
     
-    text("W + A + D keys to move. K to shoot", width-30, 30);
+    text("W + A + D keys to move. K to shoot. I to place bombs.", width-30, 30);
     
     // set up a for loop based on the length of any sprite
     for (var i=0; i<allSprites.length; i++) {
@@ -73,6 +77,16 @@ function draw() {
     }
     
     asteroids.overlap(bullets, asteroidHit);
+    asteroids.overlap(mines, asteroidBombed);
+    
+    if (keyDown("M")) {
+        for (var i = 0; i<8; i++) {
+        var ang = random(360);
+        var px = width/2 + 1000 * cos(radians(ang));
+        var py = height/2 + 1000* sin(radians(ang));
+        createAsteroid(3, px, py);
+        }
+    }
     
     if (keyDown("A"))
         ship.rotation -= 4;
@@ -84,20 +98,30 @@ function draw() {
     
     
     if (keyDown("J"))
-        ship.rotation -= 40;
+        ship.rotation -= 10;
     
     
     if (keyDown("L"))
-        ship.rotation += 40;
+        ship.rotation += 10;
     
     
+    if (keyWentDown("I")) {
+    var mine = createSprite(ship.position.x, ship.position.y);
+    mine.addImage(minesImage);
+    mine.setSpeed(0, ship.rotation);
+    mine.life = 3000;
+    mines.add(mine);
+    }
+
+
+
     if (keyDown("K")) {
     var bullet = createSprite(ship.position.x, ship.position.y);
     bullet.addImage(bulletImage);
     bullet.setSpeed(10+ship.getSpeed(), ship.rotation);
-    bullet.life = 3000;
+    bullet.life = 30;
     bullets.add(bullet);
-}
+    }
     
     
     drawSprites();
@@ -138,5 +162,33 @@ function asteroidHit(asteroid, bullet) {
         
     }
     bullet.remove();
+    asteroid.remove();
+}
+
+function asteroidBombed(asteroid, mine) {
+    var newType = asteroid.type-1;
+    
+    if (newType>0) {
+        createAsteroid(newType, asteroid.position.x, asteroid.position.y);
+        createAsteroid(newType, asteroid.position.x, asteroid.position.y);
+    }
+    
+    for (var i=0; i<10; i++) {
+        var p = createSprite(mine.position.x, mine.position.y);
+        p.addImage(particleImage);
+        p.setSpeed(random(3,5), random(360));
+        p.friction = 0.95;
+        p.life = 15;
+        
+    }
+    
+    for (var i=0; i<random(3,6); i++) {
+    var bullet = createSprite(mine.position.x, mine.position.y);
+    bullet.addImage(bulletImage);
+    bullet.setSpeed(random(1,5), random(360));
+    bullet.life = 300;
+    bullets.add(bullet);
+    }
+    mine.remove();
     asteroid.remove();
 }
