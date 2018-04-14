@@ -44,7 +44,7 @@ function draw() {
     textAlign(RIGHT);
     textSize(12);
     
-    text("W + A + D keys to move. K to shoot. I to place bombs. M to spawn asteroids. Good luck!", width-30, 30);
+    text("W + A + D keys to move. K to shoot. I to place bombs. M to spawn asteroids. Good luck!", width-60, 30);
     
     // set up a for loop based on the length of any sprite
     for (var i=0; i<allSprites.length; i++) {
